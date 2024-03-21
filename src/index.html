@@ -35,54 +35,119 @@
 
   <main class="main">
     <div class="container">
-      <aside class="sidebar">
-        <h2 class="title__category">Blusas</h2>
-        
-         <div class="filter">
+      <div class="wrap-content">
+        <aside class="sidebar">
+          <h2 class="title__category">Blusas</h2>
+
+          <div class="top__filter">  
+            <h3 class="top__filter--title">Filtrar</h3>
+            <span class="top__filter--close">&times;</span>
+          </div>
+
+          <div class="filter">
             <div class="filter__item filter__item--color">
-              <h3 class="ilter__item--title">Cores</h3>
+              <div class="filter__item--top">
+                <h3 class="filter__item--title">Cores</h3>
+                <span class="seta"></span>
+              </div>
               <ul></ul>
               <div class="filter__more">
-                Ver todas as cores           
+                Ver todas as cores
               </div>
             </div>
             <div class="filter__item filter__item--size">
-              <h3 class="ilter__item--title">Tamanhos</h3>
+              <div class="filter__item--top">
+                <h3 class="filter__item--title">Tamanhos</h3>
+                <span class="seta"></span>
+              </div>
               <ul></ul>
             </div>
             <div class="filter__item filter__item--price">
-              <h3 class="ilter__item--title">Faixa de Preço</h3>
+              <div class="filter__item--top">
+                <h3 class="filter__item--title">Faixa de Preço</h3>
+                <span class="seta"></span>
+              </div>
               <ul>
                 <li>
-                  <input type="checkbox"/>
-                  <span>de R$0 até R$50</span>
+                  <label>
+                    <input type="checkbox" />
+                    <span>de R$0 até R$50</span>
+                  </label>
                 </li>
                 <li>
-                  <input type="checkbox"/>
-                  <span>de R$51 até R$150</span>
+                  <label>
+                    <input type="checkbox" />
+                    <span>de R$51 até R$150</span>
+                  </label>
                 </li>
                 <li>
-                  <input type="checkbox"/>
-                  <span>de R$151 até R$300</span>
+                  <label>
+                    <input type="checkbox" />
+                    <span>de R$151 até R$300</span>
+                  </label>
                 </li>
                 <li>
-                  <input type="checkbox"/>
-                  <span>de R$301 até R$500</span>
+                  <label>
+                    <input type="checkbox" />
+                    <span>de R$301 até R$500</span>
+                  </label>
                 </li>
                 <li>
-                  <input type="checkbox"/>
-                  <span>a partir de R$ 500</span>
+                  <label>
+                    <input type="checkbox" />
+                    <span>a partir de R$ 500</span>
+                  </label>
                 </li>
               </ul>
             </div>
-         </div>
-      </aside>
-  
-      <div class="listProducts">
-        <div class="listProducts__filterOrder"></div>
-  
-        <div class="listProducts__list">
-  
+          </div>
+
+          <div class="buttons">
+            <button class="buttons__item--aplicar">Aplicar</button>
+            <button class="buttons__item--limpar">Limpar</button>
+          </div>
+        </aside>
+
+        <h2 class="title__category mob">Blusas</h2>
+        <div class="filter__mob">
+          <div class="filter__mob__item">
+            Filtrar
+          </div>
+          <div class="filter__mob__item">
+            Ordenar
+          </div>
+        </div>
+
+        <div class="filter__order__mob">
+          <div class="top__filter">  
+            <h3 class="top__filter--title">Ordenar</h3>
+            <span class="top__filter--close">&times;</span>
+          </div>
+          <ul class="filter__order__mob--list">
+            <li>Mais recente</li>
+            <li>Maior preço</li>
+            <li>Menor preço</li>
+          </ul>
+        </div>
+
+        <div class="listProducts">
+          <div class="listProducts__filterOrder">
+            <div class="fake-select">
+              <div class="selected">
+                <div>Ordenar por:</div>
+              </div>
+              <div class="sub">
+                <div>Mais recentes</div>
+                <div>Menor preço</div>
+                <div>Maior preço</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="listProducts__list">
+            <ul></ul>
+            <button class="btn load-more">Carregar mais</button>
+          </div>
         </div>
       </div>
     </div>

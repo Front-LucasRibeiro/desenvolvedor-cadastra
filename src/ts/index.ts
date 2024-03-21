@@ -21,6 +21,7 @@ function filterColor() {
 
       uniqueColors.map(color => {
 
+        let label = document.createElement('label');
         let checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.id = color;
@@ -29,9 +30,11 @@ function filterColor() {
         let span = document.createElement('span');
         span.textContent = color;
 
+        label.append(checkbox)
+        label.append(span)
+
         let li = document.createElement('li')
-        li.append(checkbox)
-        li.append(span)
+        li.append(label)
 
         document.querySelector('.filter__item--color ul').append(li)
       })
@@ -41,70 +44,106 @@ function filterColor() {
     });
 }
 
-function filterSize(){
+function filterSize() {
   fetch(`${serverUrl}/products`)
-  .then(res => res.json())
-  .then((data: ItemSize[]) => {
+    .then(res => res.json())
+    .then((data: ItemSize[]) => {
 
-    // filter size 
-    function extrairNumeros(array: string[]): string[] {
-      // Expressão regular para verificar se uma string contém apenas números
-      const regex = /^\d+$/;
-  
-      // Filtra apenas os elementos que são números
-      const numeros = array.filter(item => regex.test(item));
-  
-      // Ordena os números
-      numeros.sort((a, b) => parseInt(a) - parseInt(b));
-  
-      return numeros;
-  }
+      // filter size 
+      function extrairNumeros(array: string[]): string[] {
+        // Expressão regular para verificar se uma string contém apenas números
+        const regex = /^\d+$/;
 
-    const uniqueSizes = [...new Set(data.flatMap((item: ItemSize) => item.size))];
-    const sizesOrder = extrairNumeros(uniqueSizes);
+        // Filtra apenas os elementos que são números
+        const numeros = array.filter(item => regex.test(item));
 
-    const ordemPersonalizada: Record<string, number> = { 'P': 0, 'M': 1, 'G': 2, 'GG': 3, 'U': 4 };
+        // Ordena os números
+        numeros.sort((a, b) => parseInt(a) - parseInt(b));
 
-    // Filtra os tamanhos para incluir apenas os tamanhos desejados
-    const tamanhosFiltrados = uniqueSizes.filter(tamanho => tamanho in ordemPersonalizada);
-
-    // Ordena os tamanhos filtrados de acordo com a ordem personalizada
-    tamanhosFiltrados.sort((a, b) => {
-      // Assegura que 'a' e 'b' são chaves válidas no objeto ordemPersonalizada
-      if (!(a in ordemPersonalizada) || !(b in ordemPersonalizada)) {
-        throw new Error(`Tamanho inválido: ${a} ou ${b}`);
+        return numeros;
       }
-      // Compara os valores de acordo com a ordem personalizada
-      return ordemPersonalizada[a] - ordemPersonalizada[b];
-    });
 
-    tamanhosFiltrados.map(size => {
+      const uniqueSizes = [...new Set(data.flatMap((item: ItemSize) => item.size))];
+      const sizesOrder = extrairNumeros(uniqueSizes);
 
-      let span = document.createElement('span');
-      span.textContent = size;
+      const ordemPersonalizada: Record<string, number> = { 'P': 0, 'M': 1, 'G': 2, 'GG': 3, 'U': 4 };
 
-      let li = document.createElement('li')
-      li.append(span)
+      // Filtra os tamanhos para incluir apenas os tamanhos desejados
+      const tamanhosFiltrados = uniqueSizes.filter(tamanho => tamanho in ordemPersonalizada);
 
-      document.querySelector('.filter__item--size ul').append(li)
+      // Ordena os tamanhos filtrados de acordo com a ordem personalizada
+      tamanhosFiltrados.sort((a, b) => {
+        // Assegura que 'a' e 'b' são chaves válidas no objeto ordemPersonalizada
+        if (!(a in ordemPersonalizada) || !(b in ordemPersonalizada)) {
+          throw new Error(`Tamanho inválido: ${a} ou ${b}`);
+        }
+        // Compara os valores de acordo com a ordem personalizada
+        return ordemPersonalizada[a] - ordemPersonalizada[b];
+      });
+
+      tamanhosFiltrados.map(size => {
+        let li = document.createElement('li')
+        li.textContent = size;
+
+        document.querySelector('.filter__item--size ul').append(li)
+      })
+
+      sizesOrder.map(size => {
+        let li = document.createElement('li')
+        li.textContent = size;
+
+        document.querySelector('.filter__item--size ul').append(li)
+      })
     })
-
-    sizesOrder.map(size => {
-
-      let span = document.createElement('span');
-      span.textContent = size;
-
-      let li = document.createElement('li')
-      li.append(span)
-
-      document.querySelector('.filter__item--size ul').append(li)
-    })
-  })
 }
+
+function listProducts() {
+
+  fetch(`${serverUrl}/products`)
+    .then(res => res.json())
+    .then((data: Product[]) => {
+
+      if (data.length) {
+        const formato = { style: 'currency', currency: 'BRL' };
+
+        data.map(product => {
+          const li = document.createElement('li');
+
+          const img = document.createElement('img');
+          img.src = product.image;
+          li.append(img);
+
+          const titulo = document.createElement('h3');
+          titulo.textContent = product.name;
+          titulo.classList.add('product__title')
+          li.append(titulo);
+
+          const price = document.createElement('p');
+          price.textContent = String(product.price.toLocaleString('pt-BR', formato));
+          price.classList.add('product__price')
+          li.append(price);
+
+          const parcelamento = document.createElement('p');
+          parcelamento.textContent = `até ${product.parcelamento[0]}x de ${product.parcelamento[1].toLocaleString('pt-BR', formato)}`;
+          parcelamento.classList.add('product__parcelamento')
+          li.append(parcelamento);
+
+          const btn = document.createElement('button');
+          btn.textContent = 'Comprar';
+          btn.classList.add('btn-comprar');
+          li.append(btn);
+
+          document.querySelector('.listProducts__list ul').append(li);
+        })
+      }
+    })
+}
+
 
 function main() {
   filterColor();
   filterSize();
+  listProducts();
 }
 
 

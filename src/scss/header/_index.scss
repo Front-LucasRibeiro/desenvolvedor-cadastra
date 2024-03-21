@@ -2,6 +2,9 @@
 
 
 .header{
+  border-bottom: 1px solid #c7c7c7;
+  height: 66px;
+
   .container{
     display: flex;
     justify-content: space-between;
@@ -18,8 +21,8 @@
   &__cart{
     display: inline-block;
     background-image: url($cart);
-    width: 20px;
-    height: 23px;
+    width: 17px;
+    height: 20px;
     cursor: pointer;
   }
 }
