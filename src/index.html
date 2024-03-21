@@ -1,18 +1,97 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Desenvolvedor M3</title>
+  <link href="https://cadastra.com/img/site/favicon-dark.png" rel="icon" media="(prefers-color-scheme: dark)">
+  <link href="https://cadastra.com/img/site/favicon-light.png" rel="icon" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#FB953E">
+  <title>Somos uma empresa global de soluções em marketing, estratégia de negócios, tecnologia, consultoria, dados e
+    analytics com mais de 20 anos de experiência.</title>
+
+  <!-- start fonts  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+    rel="stylesheet">
+  <!-- end fonts  -->
+
   <link rel="stylesheet" href="main.css" />
 </head>
 
-<body>
+<body class="category">
+  <header class="header">
+    <div class="container">
+      <h1 aria-label="Cadastra">
+        <a href="https://cadastra.com/pt-br" target="_blank">
+          <div class="header__logo"></div>
+        </a>
+      </h1>
+      <div class="header__cart"></div>
+    </div>
+  </header>
 
+  <main class="main">
+    <div class="container">
+      <aside class="sidebar">
+        <h2 class="title__category">Blusas</h2>
+        
+         <div class="filter">
+            <div class="filter__item filter__item--color">
+              <h3 class="ilter__item--title">Cores</h3>
+              <ul></ul>
+              <div class="filter__more">
+                Ver todas as cores           
+              </div>
+            </div>
+            <div class="filter__item filter__item--size">
+              <h3 class="ilter__item--title">Tamanhos</h3>
+              <ul></ul>
+            </div>
+            <div class="filter__item filter__item--price">
+              <h3 class="ilter__item--title">Faixa de Preço</h3>
+              <ul>
+                <li>
+                  <input type="checkbox"/>
+                  <span>de R$0 até R$50</span>
+                </li>
+                <li>
+                  <input type="checkbox"/>
+                  <span>de R$51 até R$150</span>
+                </li>
+                <li>
+                  <input type="checkbox"/>
+                  <span>de R$151 até R$300</span>
+                </li>
+                <li>
+                  <input type="checkbox"/>
+                  <span>de R$301 até R$500</span>
+                </li>
+                <li>
+                  <input type="checkbox"/>
+                  <span>a partir de R$ 500</span>
+                </li>
+              </ul>
+            </div>
+         </div>
+      </aside>
+  
+      <div class="listProducts">
+        <div class="listProducts__filterOrder"></div>
+  
+        <div class="listProducts__list">
+  
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>CADASTRA: Implantação de E-commerce VTEX</p>
+  </footer>
 </body>
-<h1>Desafio m3</h1>
 
 <script src="bundle.js"></script>
 

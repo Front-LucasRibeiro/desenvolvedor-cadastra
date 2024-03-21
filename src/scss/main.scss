@@ -1,1 +1,8 @@
-@import "reset";
+@import "./configs/reset";
+@import "./configs/variables";
+@import "./configs/base";
+@import "./header/index";
+@import "./footer/index"; 
+
+// Pages 
+@import "./pages/category/index";

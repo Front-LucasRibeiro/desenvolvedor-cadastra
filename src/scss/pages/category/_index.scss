@@ -1,0 +1,9 @@
+@import './components/aside';
+
+body {
+  &.category {
+    .main{
+      margin-top: 40px;
+    }
+  }
+}

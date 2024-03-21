@@ -1,0 +1,25 @@
+@import './variables';
+
+
+.header{
+  .container{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+   
+  &__logo{
+    display: inline-block;
+    background-image: url($logoCadastra);
+    width: 166px;
+    height: 25px; 
+  }
+
+  &__cart{
+    display: inline-block;
+    background-image: url($cart);
+    width: 20px;
+    height: 23px;
+    cursor: pointer;
+  }
+}

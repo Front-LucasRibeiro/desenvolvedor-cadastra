@@ -1,5 +1,4 @@
 const path = require("path");
-const webpack = require("webpack");
 
 module.exports = (paths) => ({
   entry: {
@@ -10,6 +9,8 @@ module.exports = (paths) => ({
     filename: "bundle.js",
   },
   mode: "development",
+  target: "web",
+  devtool: "source-map",
   module: {
     rules: [
       {
@@ -19,6 +20,9 @@ module.exports = (paths) => ({
         use: "ts-loader",
       },
     ],
+  },
+  resolve: {
+    extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
   plugins: [],
 });
