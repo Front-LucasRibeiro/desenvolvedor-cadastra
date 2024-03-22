@@ -2,6 +2,7 @@ import { Product, ItemColor, ItemSize } from "./Product";
 
 const serverUrl = "http://localhost:5000";
 const formato = { style: 'currency', currency: 'BRL' };
+const itensByPge = 9;
 const checkedValues: { color: string[], size: string[], price: string[] } = {
   color: [],
   size: [],
@@ -76,9 +77,25 @@ function getFilterSize() {
       });
 
       sizeList.addEventListener('change', () => {
-        checkedValues.size = Array.from(sizeList.querySelectorAll('input:checked')).map((checkbox: HTMLInputElement) => checkbox.value);
+        const checkboxes = sizeList.querySelectorAll('input[type="checkbox"]');
+
+        checkboxes.forEach((checkbox: HTMLInputElement) => {
+          const li = checkbox.closest('li');
+
+          if (checkbox.checked) {
+            li.classList.add('selected');
+          } else {
+            li.classList.remove('selected');
+          }
+        });
+
+        checkedValues.size = Array.from(checkboxes)
+          .filter((checkbox: HTMLInputElement) => checkbox.checked)
+          .map((checkbox: HTMLInputElement) => checkbox.value);
+
         updateProducts();
       });
+
     });
 }
 
@@ -97,7 +114,7 @@ function getProducts() {
       const productList = document.querySelector('.listProducts__list ul');
 
       if (data.length) {
-        data.forEach(product => {
+        data.forEach((product, index) => {
           const li = document.createElement('li');
 
           const img = document.createElement('img');
@@ -128,19 +145,29 @@ function getProducts() {
           li.dataset.size = JSON.stringify(product.size);
           li.dataset.price = JSON.stringify(product.price);
 
+          if (index >= itensByPge) li.classList.add('hidden')
+
           productList.appendChild(li);
         });
       }
+
+      loadMore();
     });
 }
 
 function updateProducts() {
+  const loadMoreBtn = document.querySelector('.load-more');
+  if (loadMoreBtn instanceof HTMLElement) {
+    loadMoreBtn.style.display = 'flex';
+  }
+
   fetchProducts()
     .then((data: Product[]) => {
       const productList = document.querySelector('.listProducts__list ul');
       productList.innerHTML = '<p class="filter-info">Não existem resultados para essa busca!</p>';
 
-      data.forEach(product => {
+      
+      data.forEach((product,index) => {
         let isVisible = true;
 
         // Filtro de cores
@@ -180,13 +207,15 @@ function updateProducts() {
             productList.remove();
           }
 
-          montaShelf(product);
+          montaShelf(product,index);
         }
       });
+
+      loadMore();
     });
 }
 
-function montaShelf(product: Product) {
+function montaShelf(product: Product, index: number) {
   const li = document.createElement('li');
 
   const img = document.createElement('img');
@@ -216,6 +245,8 @@ function montaShelf(product: Product) {
   li.dataset.color = product.color;
   li.dataset.size = JSON.stringify(product.size);
   li.dataset.price = JSON.stringify(product.price);
+
+  if (index >= itensByPge) li.classList.add('hidden')
 
   document.querySelector('.listProducts__list ul').appendChild(li);
 }
@@ -252,8 +283,8 @@ function clearFilter() {
     checkedValues.color = []
     checkedValues.size = []
     checkedValues.price = []
-  
-    updateProducts()  
+
+    updateProducts()
   });
 }
 
@@ -282,12 +313,52 @@ function closeFilterMob() {
   });
 }
 
-function filterOrderMob(){
+function filterOrderMob() {
   let elemFiltrar = document.querySelector('.filter__mob__item--ordenar');
 
   elemFiltrar.addEventListener('click', function () {
     let orderFilter = document.querySelector('.filter__order__mob') as HTMLElement;
     orderFilter.style.display = 'block';
+  });
+}
+
+function showBtnLoadMore(loadMoreBtn:Element){
+  // Ocultar o botão "Load More" se não houver mais itens ocultos
+  if (document.querySelectorAll('.listProducts__list ul .hidden').length === 0) {
+    if (loadMoreBtn instanceof HTMLElement) {
+      loadMoreBtn.style.display = 'none';
+    }
+  }else{
+    if (loadMoreBtn instanceof HTMLElement) {
+      loadMoreBtn.style.display = 'flex';
+    }
+  }
+}
+
+function loadMore() {
+  const loadMoreBtn = document.querySelector('.load-more');
+  const hiddenItems = document.querySelectorAll('.listProducts__list ul .hidden');
+
+  // Ocultar todos os itens que excedem o número por página
+  hiddenItems.forEach((item, index) => {
+    if (index >= itensByPge && item instanceof HTMLElement) {
+      item.style.display = 'none';
+    }
+  });
+
+  // Mostrar mais itens quando o botão "Load More" for clicado
+  loadMoreBtn.addEventListener('click', function () {
+    hiddenItems.forEach((item, index) => {
+      if (index >= itensByPge) {
+        return;
+      }
+      if (item instanceof HTMLElement) {
+        item.style.display = ''; // Mostrar item
+        item.classList.remove('hidden');
+      }
+    });
+
+    showBtnLoadMore(loadMoreBtn)
   });
 }
 
