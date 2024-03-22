@@ -1,0 +1,25 @@
+{
+  "cart": [
+    {
+      "id": "2",
+      "name": "Saia em couro",
+      "price": "398",
+      "image": "/img/img_3.png",
+      "qtd": "1"
+    },
+    {
+      "id": "5",
+      "name": "Body Leopardo",
+      "price": "129.9",
+      "image": "/img/img_6.png",
+      "qtd": "4"
+    },
+    {
+      "id": "1",
+      "name": "Camiseta Mescla",
+      "price": "28.8",
+      "image": "/img/img_2.png",
+      "qtd": "1"
+    }
+  ]
+}

@@ -16,3 +16,11 @@ export interface ItemColor {
 export interface ItemSize {
   size: string[];
 }
+
+export interface Cart {
+  id: string;
+  name: string;
+  qtd: string;
+  price: string;
+  image: string;
+}

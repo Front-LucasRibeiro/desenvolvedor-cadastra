@@ -1,6 +1,7 @@
-import { Product, ItemColor, ItemSize } from "./Product";
+import { Product, Cart, ItemColor, ItemSize } from "./Product";
 
 const serverUrl = "http://localhost:5000";
+const serverCartUrl = "http://localhost:5001/cart";
 const formato = { style: 'currency', currency: 'BRL' };
 const itensByPge = 9;
 const checkedValues: { color: string[], size: string[], price: string[] } = {
@@ -9,8 +10,13 @@ const checkedValues: { color: string[], size: string[], price: string[] } = {
   price: []
 };
 
+
 function fetchProducts(): Promise<Product[]> {
   return fetch(`${serverUrl}/products`).then(res => res.json());
+}
+
+function fetchCart(): Promise<Cart[]> {
+  return fetch(serverCartUrl).then(res => res.json());
 }
 
 function getFilterColor() {
@@ -139,11 +145,16 @@ function getProducts() {
           const btn = document.createElement('button');
           btn.textContent = 'Comprar';
           btn.classList.add('btn-comprar');
+          btn.dataset.id = JSON.stringify(product.id);
+          btn.dataset.name = product.name;
+          btn.dataset.price = JSON.stringify(product.price);
+          btn.dataset.image = product.image;
           li.appendChild(btn);
 
           li.dataset.color = product.color;
           li.dataset.size = JSON.stringify(product.size);
           li.dataset.price = JSON.stringify(product.price);
+          li.dataset.id = JSON.stringify(product.id);
 
           if (index >= itensByPge) li.classList.add('hidden')
 
@@ -151,6 +162,7 @@ function getProducts() {
         });
       }
 
+      cart();
       loadMore();
     });
 }
@@ -166,8 +178,8 @@ function updateProducts() {
       const productList = document.querySelector('.listProducts__list ul');
       productList.innerHTML = '<p class="filter-info">Não existem resultados para essa busca!</p>';
 
-      
-      data.forEach((product,index) => {
+
+      data.forEach((product, index) => {
         let isVisible = true;
 
         // Filtro de cores
@@ -207,7 +219,7 @@ function updateProducts() {
             productList.remove();
           }
 
-          montaShelf(product,index);
+          montaShelf(product, index);
         }
       });
 
@@ -249,6 +261,8 @@ function montaShelf(product: Product, index: number) {
   if (index >= itensByPge) li.classList.add('hidden')
 
   document.querySelector('.listProducts__list ul').appendChild(li);
+
+  cart();
 }
 
 function toggleFilter() {
@@ -322,13 +336,13 @@ function filterOrderMob() {
   });
 }
 
-function showBtnLoadMore(loadMoreBtn:Element){
+function showBtnLoadMore(loadMoreBtn: Element) {
   // Ocultar o botão "Load More" se não houver mais itens ocultos
   if (document.querySelectorAll('.listProducts__list ul .hidden').length === 0) {
     if (loadMoreBtn instanceof HTMLElement) {
       loadMoreBtn.style.display = 'none';
     }
-  }else{
+  } else {
     if (loadMoreBtn instanceof HTMLElement) {
       loadMoreBtn.style.display = 'flex';
     }
@@ -359,6 +373,250 @@ function loadMore() {
     });
 
     showBtnLoadMore(loadMoreBtn)
+  });
+}
+
+function getListCart() {
+  fetchCart()
+    .then((res) => {
+      console.log(res)
+
+      let qtdProducts = res.length;
+
+      let iconCartdocument = document.querySelector('.header__cart')
+      iconCartdocument.innerHTML = `
+        <div class="qtd__products">${qtdProducts}</div>
+      `;
+
+      if (res.length) {
+
+        let listCart = document.querySelector('.carrinho ul')
+        listCart.innerHTML = "";
+
+        res.map(product => {
+          let li = document.createElement('li')
+          let price = "";
+
+          price = Number(product.price).toLocaleString('pt-BR', formato);
+
+          li.innerHTML = `
+            <img src="${product.image}" alt="${product.name}" />
+            <div class="carrinho__info">
+              <h3 class="carrinho__titulo">${product.name}</h3>
+              <p class="carrinho__price">${price}</p>
+
+              <div class="carrinho__seletor">
+              <input type="text" min="1" value="${product.qtd}" disabled />
+              </div>
+            </div>
+            <span class="carrinho__remove" data-id="${product.id}">
+              <img src="/img/remove.png" alt="Remover produto" data-id="${product.id}" />
+            </span>
+          `;
+
+          listCart.append(li)
+          removeCart(product.id);
+        })
+
+      } else {
+        let listCart = document.querySelector('.carrinho ul')
+        listCart.innerHTML = "<li class='carrinho__empty'>Carrinho vazio.</li>";
+      }
+    })
+    .catch(error => {
+      console.error('Erro na solicitação do Cart:', error);
+    });
+}
+
+function openCart() {
+  let btnComprar = document.querySelectorAll('.btn-comprar,.header__cart')
+
+  btnComprar.forEach(btn => {
+    btn.addEventListener('click', function () {
+      let cart = document.querySelector('.carrinho');
+      if (cart instanceof HTMLElement) {
+        cart.classList.toggle('ativo');
+      }
+
+      let overlay = document.querySelector('.carrinho__overlay')
+      if (overlay instanceof HTMLElement) {
+        overlay.style.display = "block";
+      }
+    });
+  });
+}
+
+function closeCart() {
+  let close = document.querySelector('.carrinho__close');
+
+  close.addEventListener('click', function () {
+    let cart = document.querySelector('.carrinho');
+    cart.classList.remove('ativo')
+
+    let overlay = document.querySelector('.carrinho__overlay')
+    if (overlay instanceof HTMLElement) {
+      overlay.style.display = "none";
+    }
+  })
+}
+
+function addCart(data: object) {
+
+  interface CartResponse {
+    id: string;
+    name: string;
+    price: number;
+    parcelamento: Array<number>;
+    color: string;
+    image: string;
+    size: Array<string>;
+    date: string;
+    qtd: string;
+  }
+
+  interface RequestOptions {
+    method: string;
+    headers: {
+      [key: string]: string;
+    };
+    body?: string;
+  }
+
+  const options: RequestOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  };
+
+  fetch(serverCartUrl, options)
+    .then((response: Response) => {
+      if (!response.ok) {
+        throw new Error('Ocorreu um erro ao enviar os dados.');
+      }
+      return response.json() as Promise<CartResponse>;
+    })
+    .then((data: CartResponse) => {
+      console.log('Dados enviados com sucesso:', data);
+
+      getListCart();
+    })
+    .catch((error: Error) => {
+      console.error('Erro ao enviar os dados:', error);
+      alteraQuantidade(data);
+    });
+
+}
+
+function alteraQuantidade(data: any) {
+
+  let id = data.id
+  let qtd = ""
+
+  fetchCart()
+    .then((res) => {
+      console.log(res)
+
+      if (res.length) {
+
+        res.map(product => {
+          if (Number(product.id) === Number(id)) {
+            qtd = String(Number(data.qtd) + Number(product.qtd))
+
+            const updateData = {
+              qtd
+            };
+
+            const requestOptions = {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(updateData)
+            };
+
+            fetch(`${serverCartUrl}/${id}`, requestOptions)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Ocorreu um erro ao atualizar o produto.');
+                }
+                return response.json();
+              })
+              .then(data => {
+                getListCart();
+                console.log('Produto atualizado com sucesso:', data);
+              })
+              .catch(error => {
+                console.error('Erro ao atualizar o produto:', error);
+              });
+          }
+        })
+      }
+    })
+}
+
+function removeCart(id: string) {
+  const url = `${serverCartUrl}/${id}`;
+  let remover = document.querySelectorAll('.carrinho__remove');
+
+  remover.forEach(produto => {
+    produto.addEventListener('click', function (e) {
+      const target = e.target as HTMLElement;
+      const dataset = target.dataset;
+
+      if (dataset.id === id) {
+        fetch(url, {
+          method: 'DELETE'
+        }).then(response => {
+          if (!response.ok) {
+            throw new Error('Erro ao excluir o produto.');
+          }
+
+          getListCart();
+
+          console.log('Produto excluído com sucesso.');
+
+          setTimeout(function () {
+            alert('Produto removido com sucesso!');
+          }, 1000)
+
+        }).catch(error => {
+          console.error('Erro ao enviar solicitação DELETE:', error);
+        });
+      }
+    })
+  })
+
+}
+
+const cart = () => {
+  getListCart();
+  openCart();
+  closeCart();
+
+  let btnComprar = document.querySelectorAll('.btn-comprar')
+
+  btnComprar.forEach(btn => {
+    btn.addEventListener('click', function (e) {
+      const target = e.target as HTMLElement;
+      const dataset = target.dataset;
+
+      let id = dataset.id.replace(/"/g, '');
+      const name = dataset.name;
+      const price = dataset.price;
+      const image = dataset.image;
+
+      let data = {
+        id,
+        name,
+        price,
+        image,
+        qtd: '1'
+      }
+
+      addCart(data);
+    });
   });
 }
 
