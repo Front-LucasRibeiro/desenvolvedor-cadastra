@@ -153,8 +153,6 @@ function updateProducts() {
           isVisible = false;
         }
 
-        console.log('checkedValues', checkedValues)
-
         // Filtro de preço
         if (checkedValues.price.length > 0) {
           let isPriceInRange = false;
@@ -222,11 +220,86 @@ function montaShelf(product: Product) {
   document.querySelector('.listProducts__list ul').appendChild(li);
 }
 
+function toggleFilter() {
+  let filterItems = document.querySelectorAll('.filter__item--top');
+
+  filterItems.forEach(item => {
+    item.addEventListener('click', function () {
+      item.classList.toggle('ativo');
+
+      let ulElement = item.nextElementSibling;
+
+      // Verificando se o próximo elemento é uma ul
+      if (ulElement && ulElement.tagName.toLowerCase() === 'div') {
+        ulElement.classList.toggle('ativo');
+      }
+    });
+  });
+
+  clearFilter();
+}
+
+function clearFilter() {
+  let elemLimpar = document.querySelector('.buttons__item--limpar');
+
+  elemLimpar.addEventListener('click', function () {
+    let checkboxes = document.querySelectorAll('.filter__item input[type="checkbox"]');
+
+    checkboxes.forEach((checkbox: HTMLInputElement) => {
+      checkbox.checked = false;
+    });
+
+    checkedValues.color = []
+    checkedValues.size = []
+    checkedValues.price = []
+  
+    updateProducts()  
+  });
+}
+
+
+function filterMob() {
+  let elemFiltrar = document.querySelector('.filter__mob__item--filtrar');
+  elemFiltrar.addEventListener('click', function () {
+    let sidebar = document.querySelector('.sidebar') as HTMLElement;
+    sidebar.style.display = 'block';
+  });
+
+  toggleFilter()
+}
+
+function closeFilterMob() {
+  let elements = document.querySelectorAll('.top__filter--close, .buttons__item--aplicar');
+
+  elements.forEach(elem => {
+    elem.addEventListener('click', function () {
+      let sidebar = document.querySelector('.sidebar') as HTMLElement;
+      sidebar.style.display = 'none';
+
+      let filterOrder = document.querySelector('.filter__order__mob') as HTMLElement;
+      filterOrder.style.display = 'none';
+    });
+  });
+}
+
+function filterOrderMob(){
+  let elemFiltrar = document.querySelector('.filter__mob__item--ordenar');
+
+  elemFiltrar.addEventListener('click', function () {
+    let orderFilter = document.querySelector('.filter__order__mob') as HTMLElement;
+    orderFilter.style.display = 'block';
+  });
+}
+
+
 function main() {
   getProducts();
   getFilterColor();
   getFilterSize();
   getFilterPrice();
+  filterMob();
+  closeFilterMob();
+  filterOrderMob();
 }
 
 document.addEventListener("DOMContentLoaded", main);

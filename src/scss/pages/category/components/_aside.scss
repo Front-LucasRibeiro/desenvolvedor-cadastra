@@ -92,17 +92,31 @@
       @include checkbox;
       margin-bottom: 24px;
 
-      .seta{
+      .seta {
         display: none;
       }
-      
+
 
       @media (max-width: 1024px) {
         margin-bottom: 30px;
 
-        &--top{
+        &--top {
           display: flex;
           justify-content: space-between;
+
+          &.ativo {
+            .seta {
+              transition: .5s;
+              transform: rotate(180deg);
+            }
+          }
+        }
+
+        .sub{
+          display: none;
+          &.ativo{
+            display: block;
+          }
         }
 
         .seta {
@@ -112,11 +126,6 @@
           width: 20px;
           height: 15px;
           transition: .5s;
-
-          &.ativo{
-            transition: .5s;
-            transform: rotate(180deg);
-          }
         }
       }
 
