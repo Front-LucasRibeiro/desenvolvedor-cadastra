@@ -1,5 +1,3 @@
-const path = require("path");
-
 const { series, src, dest, parallel, watch } = require("gulp");
 const webpack = require("webpack");
 const del = require("del");
@@ -7,8 +5,11 @@ const autoprefixer = require("gulp-autoprefixer");
 const sass = require("gulp-sass")(require("sass"));
 const sourcemaps = require("gulp-sourcemaps");
 const browserSync = require("browser-sync").create();
-
-const webpackConfig = require("./webpack.config.js"); 
+const webpackConfig = require("./webpack.config.js");
+const cleanCSS = require("gulp-clean-css");
+const terser = require("gulp-terser");
+const htmlmin = require("gulp-htmlmin");
+const { exec } = require("child_process");
 
 const paths = {
   scripts: {
@@ -49,6 +50,7 @@ function styles() {
         cascade: false,
       })
     )
+    .pipe(cleanCSS())
     .pipe(sourcemaps.write())
     .pipe(dest(paths.dest))
     .pipe(browserSync.stream());
@@ -79,25 +81,39 @@ function scripts() {
 }
 
 function html() {
-  return src(paths.html.src).pipe(browserSync.stream()).pipe(dest(paths.dest));
+  return src(paths.html.src)
+    .pipe(htmlmin({ collapseWhitespace: true }))
+    .pipe(browserSync.stream())
+    .pipe(dest(paths.dest));
 }
 
-function img() {
-  return src(paths.img.src).pipe(dest(paths.dest + "/img"));
+function optimizeImages(cb) {
+  exec(
+    "npx imagemin src/img/**/* --out-dir=dist/img",
+    (error, stdout, stderr) => {
+      console.log(stdout);
+      console.error(stderr);
+      cb(error);
+    }
+  );
 }
 
-const build = series(clean, parallel(styles, scripts, html, img));
+const build = series(
+  clean,
+  parallel(styles, scripts, html),
+  optimizeImages
+);
 const dev = () => {
   watch(paths.scripts.watch, { ignoreInitial: false }, scripts).on(
     "change",
     browserSync.reload
   );
   watch(paths.styles.src, { ignoreInitial: false }, styles);
-  watch(paths.img.src, { ignoreInitial: false }, img);
   watch(paths.html.src, { ignoreInitial: false }, html).on(
     "change",
     browserSync.reload
   );
+  watch(paths.img.src, { ignoreInitial: false }, optimizeImages);
   server();
 };
 

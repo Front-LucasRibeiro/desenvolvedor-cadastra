@@ -49,6 +49,8 @@ function getFilterColor() {
         checkedValues.color = Array.from(colorList.querySelectorAll('input:checked')).map((checkbox: HTMLInputElement) => checkbox.value);
         updateProducts();
       });
+
+      openMoreColor();
     })
     .catch(error => {
       console.error('Erro na solicitação:', error);
@@ -379,8 +381,6 @@ function loadMore() {
 function getListCart() {
   fetchCart()
     .then((res) => {
-      console.log(res)
-
       let qtdProducts = res.length;
 
       let iconCartdocument = document.querySelector('.header__cart')
@@ -516,8 +516,6 @@ function alteraQuantidade(data: any) {
 
   fetchCart()
     .then((res) => {
-      console.log(res)
-
       if (res.length) {
 
         res.map(product => {
@@ -619,6 +617,31 @@ const cart = () => {
     });
   });
 }
+
+function openMoreColor() {
+  const colors = document.querySelectorAll('.filter__item--color li');
+
+  colors.forEach((cor, index) => {
+    if (index >= 4) {
+      if (cor instanceof HTMLElement) {
+        cor.style.display = 'none';
+      }
+    }
+  });
+
+  const more = document.querySelector('.filter__more');
+  more.addEventListener('click', function () {
+    colors.forEach((cor, index) => {
+      if (index >= 4) {
+        if (cor instanceof HTMLElement) {
+          cor.style.display = 'block';
+        }
+      }
+    });
+    more.remove();
+  });
+}
+
 
 
 function main() {

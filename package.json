@@ -4,7 +4,7 @@
   "description": "Desafio da agencia m3 para novos colaboradores",
   "main": "index.js",
   "scripts": {
-    "start": "node_modules/.bin/cross-env SERVER_API=http://localhost:5000 npm-run-all --parallel dev server cart",
+    "start": "set SERVER_API=http://localhost:5000 && npm-run-all --parallel dev server cart",
     "start:gp": "npm-run-all --parallel dev server",
     "dev": "gulp",
     "cart": "json-server ./cart.json --port 5001",
@@ -38,6 +38,11 @@
   },
   "dependencies": {
     "cross-env": "^7.0.3",
+    "gulp-htmlmin": "^5.0.1",
+    "gulp-terser": "^2.1.0",
+    "imagemin": "^8.0.1",
+    "imagemin-jpegtran": "^7.0.0",
+    "imagemin-svgo": "^10.0.1",
     "json-server": "^0.17.0",
     "node-sass": "^6.0.1"
   }

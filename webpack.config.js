@@ -10,7 +10,6 @@ module.exports = (paths) => ({
   },
   mode: "development",
   target: "web",
-  devtool: "source-map",
   module: {
     rules: [
       {
