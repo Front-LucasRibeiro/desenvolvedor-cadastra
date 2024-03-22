@@ -8,3 +8,11 @@ export interface Product {
   size: Array<string>;
   date: string;
 }
+
+export interface ItemColor {
+  color: string
+}
+
+export interface ItemSize {
+  size: string[];
+}

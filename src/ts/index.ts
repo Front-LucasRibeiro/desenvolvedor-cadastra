@@ -1,46 +1,47 @@
-import { Product } from "./Product";
+import { Product, ItemColor, ItemSize } from "./Product";
 
 const serverUrl = "http://localhost:5000";
 const formato = { style: 'currency', currency: 'BRL' };
-const checkedValues: string[] = [];
+const checkedValues: { color: string[], size: string[], price: string[] } = {
+  color: [],
+  size: [],
+  price: []
+};
 
-interface ItemColor {
-  color: string
-}
-
-interface ItemSize {
-  size: string[];
+function fetchProducts(): Promise<Product[]> {
+  return fetch(`${serverUrl}/products`).then(res => res.json());
 }
 
 function getFilterColor() {
-
-  fetch(`${serverUrl}/products`)
-    .then(res => res.json())
+  fetchProducts()
     .then((data: ItemColor[]) => {
+      const uniqueColors = [...new Set(data.map(item => item.color))];
+      const colorList = document.querySelector('.filter__item--color ul');
 
-      // filter color 
-      const uniqueColors = [...new Set(data.map((item: ItemColor) => item.color))];
-
-      uniqueColors.map(color => {
-
-        let label = document.createElement('label');
-        let checkbox = document.createElement('input');
+      uniqueColors.forEach(color => {
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.id = color;
         checkbox.name = color;
         checkbox.value = color;
 
-        let span = document.createElement('span');
+        const span = document.createElement('span');
         span.textContent = color;
 
-        label.append(checkbox)
-        label.append(span)
+        label.appendChild(checkbox);
+        label.appendChild(span);
 
-        let li = document.createElement('li')
-        li.append(label)
+        const li = document.createElement('li');
+        li.appendChild(label);
 
-        document.querySelector('.filter__item--color ul').append(li)
-      })
+        colorList.appendChild(li);
+      });
+
+      colorList.addEventListener('change', () => {
+        checkedValues.color = Array.from(colorList.querySelectorAll('input:checked')).map((checkbox: HTMLInputElement) => checkbox.value);
+        updateProducts();
+      });
     })
     .catch(error => {
       console.error('Erro na solicitação:', error);
@@ -48,101 +49,143 @@ function getFilterColor() {
 }
 
 function getFilterSize() {
-  fetch(`${serverUrl}/products`)
-    .then(res => res.json())
+  fetchProducts()
     .then((data: ItemSize[]) => {
+      const sizes = data.flatMap(item => item.size);
+      const uniqueSizes = [...new Set(sizes)].sort();
+      const sizeList = document.querySelector('.filter__item--size ul');
 
-      // filter size 
-      function extrairNumeros(array: string[]): string[] {
-        // Expressão regular para verificar se uma string contém apenas números
-        const regex = /^\d+$/;
+      uniqueSizes.forEach(size => {
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = size;
+        checkbox.name = size;
+        checkbox.value = size;
 
-        // Filtra apenas os elementos que são números
-        const numeros = array.filter(item => regex.test(item));
+        const span = document.createElement('span');
+        span.textContent = size;
 
-        // Ordena os números
-        numeros.sort((a, b) => parseInt(a) - parseInt(b));
+        label.appendChild(checkbox);
+        label.appendChild(span);
 
-        return numeros;
-      }
+        const li = document.createElement('li');
+        li.appendChild(label);
 
-      const uniqueSizes = [...new Set(data.flatMap((item: ItemSize) => item.size))];
-      const sizesOrder = extrairNumeros(uniqueSizes);
-
-      const ordemPersonalizada: Record<string, number> = { 'P': 0, 'M': 1, 'G': 2, 'GG': 3, 'U': 4 };
-
-      // Filtra os tamanhos para incluir apenas os tamanhos desejados
-      const tamanhosFiltrados = uniqueSizes.filter(tamanho => tamanho in ordemPersonalizada);
-
-      // Ordena os tamanhos filtrados de acordo com a ordem personalizada
-      tamanhosFiltrados.sort((a, b) => {
-        // Assegura que 'a' e 'b' são chaves válidas no objeto ordemPersonalizada
-        if (!(a in ordemPersonalizada) || !(b in ordemPersonalizada)) {
-          throw new Error(`Tamanho inválido: ${a} ou ${b}`);
-        }
-        // Compara os valores de acordo com a ordem personalizada
-        return ordemPersonalizada[a] - ordemPersonalizada[b];
+        sizeList.appendChild(li);
       });
 
-      tamanhosFiltrados.map(size => {
-        let li = document.createElement('li')
-        li.textContent = size;
+      sizeList.addEventListener('change', () => {
+        checkedValues.size = Array.from(sizeList.querySelectorAll('input:checked')).map((checkbox: HTMLInputElement) => checkbox.value);
+        updateProducts();
+      });
+    });
+}
 
-        document.querySelector('.filter__item--size ul').append(li)
-      })
+function getFilterPrice() {
+  const price = document.querySelector('.filter__item--price ul');
 
-      sizesOrder.map(size => {
-        let li = document.createElement('li')
-        li.textContent = size;
-
-        document.querySelector('.filter__item--size ul').append(li)
-      })
-    })
+  price.addEventListener('change', () => {
+    checkedValues.price = Array.from(price.querySelectorAll('input:checked')).map((checkbox: HTMLInputElement) => checkbox.value);
+    updateProducts();
+  });
 }
 
 function getProducts() {
-
-  fetch(`${serverUrl}/products`)
-    .then(res => res.json())
+  fetchProducts()
     .then((data: Product[]) => {
+      const productList = document.querySelector('.listProducts__list ul');
 
       if (data.length) {
-
-        data.map(product => {
+        data.forEach(product => {
           const li = document.createElement('li');
 
           const img = document.createElement('img');
           img.src = product.image;
-          li.append(img);
+          li.appendChild(img);
 
           const titulo = document.createElement('h3');
           titulo.textContent = product.name;
           titulo.classList.add('product__title')
-          li.append(titulo);
+          li.appendChild(titulo);
 
           const price = document.createElement('p');
           price.textContent = String(product.price.toLocaleString('pt-BR', formato));
           price.classList.add('product__price')
-          li.append(price);
+          li.appendChild(price);
 
           const parcelamento = document.createElement('p');
           parcelamento.textContent = `até ${product.parcelamento[0]}x de ${product.parcelamento[1].toLocaleString('pt-BR', formato)}`;
           parcelamento.classList.add('product__parcelamento')
-          li.append(parcelamento);
+          li.appendChild(parcelamento);
 
           const btn = document.createElement('button');
           btn.textContent = 'Comprar';
           btn.classList.add('btn-comprar');
-          li.append(btn);
+          li.appendChild(btn);
 
           li.dataset.color = product.color;
           li.dataset.size = JSON.stringify(product.size);
           li.dataset.price = JSON.stringify(product.price);
 
-          document.querySelector('.listProducts__list ul').append(li);
-        })
+          productList.appendChild(li);
+        });
       }
-    })
+    });
+}
+
+function updateProducts() {
+  fetchProducts()
+    .then((data: Product[]) => {
+      const productList = document.querySelector('.listProducts__list ul');
+      productList.innerHTML = '<p class="filter-info">Não existem resultados para essa busca!</p>';
+
+      data.forEach(product => {
+        let isVisible = true;
+
+        // Filtro de cores
+        if (checkedValues.color.length > 0 && !checkedValues.color.includes(product.color)) {
+          isVisible = false;
+        }
+
+        // Filtro de tamanhos
+        if (checkedValues.size.length > 0 && !product.size.some(size => checkedValues.size.includes(size))) {
+          isVisible = false;
+        }
+
+        console.log('checkedValues', checkedValues)
+
+        // Filtro de preço
+        if (checkedValues.price.length > 0) {
+          let isPriceInRange = false;
+          checkedValues.price.forEach(filter => {
+            const [rangeStart, rangeEnd] = filter.split('-').map(Number);
+            if (rangeEnd) {
+              if (product.price >= rangeStart && product.price <= rangeEnd) {
+                isPriceInRange = true;
+              }
+            } else {
+              if (product.price >= rangeStart) {
+                isPriceInRange = true;
+              }
+            }
+          });
+          if (!isPriceInRange) {
+            isVisible = false;
+          }
+        }
+
+        if (isVisible) {
+          const productList = document.querySelector('.listProducts__list ul .filter-info');
+
+          if (productList) {
+            productList.remove();
+          }
+
+          montaShelf(product);
+        }
+      });
+    });
 }
 
 function montaShelf(product: Product) {
@@ -150,186 +193,41 @@ function montaShelf(product: Product) {
 
   const img = document.createElement('img');
   img.src = product.image;
-  li.append(img);
+  li.appendChild(img);
 
   const titulo = document.createElement('h3');
   titulo.textContent = product.name;
   titulo.classList.add('product__title')
-  li.append(titulo);
+  li.appendChild(titulo);
 
   const price = document.createElement('p');
   price.textContent = String(product.price.toLocaleString('pt-BR', formato));
   price.classList.add('product__price')
-  li.append(price);
+  li.appendChild(price);
 
   const parcelamento = document.createElement('p');
   parcelamento.textContent = `até ${product.parcelamento[0]}x de ${product.parcelamento[1].toLocaleString('pt-BR', formato)}`;
   parcelamento.classList.add('product__parcelamento')
-  li.append(parcelamento);
+  li.appendChild(parcelamento);
 
   const btn = document.createElement('button');
   btn.textContent = 'Comprar';
   btn.classList.add('btn-comprar');
-  li.append(btn);
+  li.appendChild(btn);
 
   li.dataset.color = product.color;
   li.dataset.size = JSON.stringify(product.size);
   li.dataset.price = JSON.stringify(product.price);
 
-  document.querySelector('.listProducts__list ul').append(li);
-}
-
-function verificaItensCheckados() {
-  // verifica itens por checkados 
-  document.querySelectorAll('.filter label input').forEach((input: HTMLInputElement) => {
-    // Adicionar ou remover valores do array com base no estado do input
-    input.addEventListener('change', () => {
-      if (input.checked && !checkedValues.includes(input.value)) {
-        checkedValues.push(input.value); // Adicionar valor ao array se o input estiver marcado e ainda não estiver presente no array
-      } else if (!input.checked && checkedValues.includes(input.value)) {
-        const index = checkedValues.indexOf(input.value);
-        if (index !== -1) {
-          checkedValues.splice(index, 1); // Remover valor do array se o input estiver desmarcado e estiver presente no array
-        }
-      }
-    });
-  });
-}
-
-function checkItemFilter() {
-  fetch(`${serverUrl}/products`)
-    .then(res => res.json())
-    .then((data: Product[]) => {
-      if (data.length) {
-
-        data.forEach((product: Product) => {
-          // Verifica se o produto atende a todos os critérios selecionados
-          const corFiltrada = checkedValues.includes(product.color);
-          let precoFiltrado = true;
-
-          checkedValues.forEach((itemFiltered: string) => {
-            const [rangeItemInicio, rangeItemFinal] = itemFiltered.split('-').map(Number);
-            if (rangeItemFinal === undefined) {
-              if (product.price < rangeItemInicio) {
-                precoFiltrado = false;
-              }
-            } else {
-              if (product.price < rangeItemInicio || product.price > rangeItemFinal) {
-                precoFiltrado = false;
-              }
-            }
-          });
-
-          console.log('checkedValuess', checkedValues)
-
-          // Se o produto atender a todos os critérios, monte a prateleira
-          if (corFiltrada && precoFiltrado) {
-            montaShelf(product);
-          }
-        });
-
-        if (checkedValues.length === 0) {
-          getProducts()
-        }
-      }
-    });
-}
-
-
-function filter() {
-
-  document.querySelectorAll('.filter__item--color label input').forEach(element => {
-    // Adicione um ouvinte de evento a cada elemento
-    element.addEventListener('click', function (e) {
-      const listItems: NodeListOf<HTMLUListElement> = document.querySelectorAll('.listProducts__list ul');
-      listItems.forEach((item: HTMLUListElement) => {
-        item.innerHTML = '';
-      });
-
-      verificaItensCheckados();
-
-      // colors and price 
-      checkItemFilter();
-    });
-  });
-
-  checkPriceFilter();
-}
-
-
-function fetchCheckPrice(){
-  fetch(`${serverUrl}/products`)
-  .then(res => res.json())
-  .then((data: Product[]) => {
-    if (data.length) {
-
-      let hasProductInRange = false;
-
-      data.forEach((product: Product) => {
-        let isInRange = true;
-        checkedValues.map((itemFiltered: string) => {
-          let [rangeItemInicio, rangeItemFinal] = itemFiltered.split('-').map(Number);
-
-          if (rangeItemFinal === undefined) {
-            if (product.price < rangeItemInicio) {
-              isInRange = false;
-            }
-          } else {
-            if (product.price < rangeItemInicio || product.price > rangeItemFinal) {
-              isInRange = false;
-            }
-          }
-        });
-
-        console.log('checkedValuess', checkedValues)
-
-        if (isInRange) {
-          montaShelf(product);
-          hasProductInRange = true;
-        }
-
-      });
-
-      // Se nenhum produto estiver dentro do intervalo, emita uma mensagem
-      if (!hasProductInRange) {
-        const lista = document.querySelectorAll('.listProducts__list ul');
-        lista.forEach((ul: HTMLElement) => {
-          ul.innerHTML = '<p class="filter-info">Não existem produtos para essa busca!</p>';
-        });
-      }
-
-      if (checkedValues.length === 0) {
-        getProducts()
-      }
-    }
-  });
-}
-
-
-function checkPriceFilter() {
-  document.querySelectorAll('.filter__item--price label input').forEach(element => {
-    // Adicione um ouvinte de evento a cada elemento
-    element.addEventListener('click', function (e) {
-      const listItems: NodeListOf<HTMLUListElement> = document.querySelectorAll('.listProducts__list ul');
-      listItems.forEach((item: HTMLUListElement) => {
-        item.innerHTML = '';
-      });
-
-      verificaItensCheckados();
-      fetchCheckPrice();
-    });
-  });
+  document.querySelector('.listProducts__list ul').appendChild(li);
 }
 
 function main() {
   getProducts();
   getFilterColor();
   getFilterSize();
-
-  setTimeout(function () {
-    filter()
-  }, 1000)
+  getFilterPrice();
 }
 
-
 document.addEventListener("DOMContentLoaded", main);
+
